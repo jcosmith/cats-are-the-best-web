@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cats Are the Best</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf6ee;
+    --surface: #ffffff;
+    --surface-2: #f3eadb;
+    --ink: #2a211b;
+    --ink-soft: #5e5248;
+    --muted: #8a7d71;
+    --accent: #c4572b;
+    --accent-soft: #f6dccd;
+    --accent-2: #3f7d6e;
+    --accent-2-soft: #d6ebe4;
+    --warn: #b23a3a;
+    --warn-soft: #f6d9d6;
+    --line: #e4d8c6;
+    --shadow: 0 1px 2px rgba(60, 40, 20, .06), 0 8px 24px rgba(60, 40, 20, .07);
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1a1613;
+      --surface: #241f1b;
+      --surface-2: #2e2722;
+      --ink: #f3ebe1;
+      --ink-soft: #cdbfb1;
+      --muted: #9a8c7f;
+      --accent: #e7804f;
+      --accent-soft: #4a2c1e;
+      --accent-2: #6fbfa9;
+      --accent-2-soft: #1f3a33;
+      --warn: #ec7b72;
+      --warn-soft: #4a2423;
+      --line: #3a322b;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1a1613;
+    --surface: #241f1b;
+    --surface-2: #2e2722;
+    --ink: #f3ebe1;
+    --ink-soft: #cdbfb1;
+    --muted: #9a8c7f;
+    --accent: #e7804f;
+    --accent-soft: #4a2c1e;
+    --accent-2: #6fbfa9;
+    --accent-2-soft: #1f3a33;
+    --warn: #ec7b72;
+    --warn-soft: #4a2423;
+    --line: #3a322b;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.55;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Deck ---------- */
+  .deck { position: relative; height: 100vh; height: 100dvh; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(24px, 5vw, 72px) clamp(16px, 7vw, 120px) 96px;
+    opacity: 0; visibility: hidden;
+    transform: translateX(24px);
+    transition: opacity .35s ease, transform .35s ease, visibility .35s;
+    overflow-y: auto;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: none; }
+  .slide.prev { transform: translateX(-24px); }
+  .inner { width: 100%; max-width: 1120px; margin: 0 auto; }
+
+  .kicker {
+    font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 12px;
+  }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 700; margin: 0; line-height: 1.12; text-wrap: balance; }
+  h1 { font-size: clamp(44px, 7vw, 92px); letter-spacing: -.02em; }
+  h2 { font-size: clamp(30px, 4.2vw, 52px); letter-spacing: -.015em; margin-bottom: 24px; }
+  h3 { font-size: 21px; margin-bottom: 6px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: clamp(19px, 2vw, 23px); color: var(--ink-soft); max-width: 62ch; }
+  .muted { color: var(--muted); }
+  strong { color: var(--ink); font-weight: 600; }
+  em.hl { font-style: normal; color: var(--accent); }
+
+  .source {
+    position: absolute; left: clamp(16px, 7vw, 120px); right: clamp(16px, 7vw, 120px); bottom: 60px;
+    font-size: 12.5px; color: var(--muted); max-width: 1120px; margin: 0 auto;
+  }
+
+  /* ---------- Layout helpers ---------- */
+  .grid { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .split { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  @media (max-width: 820px) {
+    .g2, .g3, .g4, .split { grid-template-columns: 1fr; }
+    .split { gap: 24px; }
+    .source { position: static; margin-top: 24px; }
+    .slide { justify-content: flex-start; padding-top: 32px; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px 22px 18px; box-shadow: var(--shadow);
+  }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 16.5px; }
+  .card .icon { font-size: 28px; line-height: 1; margin-bottom: 12px; display: block; }
+  .card.good { border-top: 4px solid var(--accent-2); }
+  .card.bad  { border-top: 4px solid var(--warn); }
+  .card.acc  { border-top: 4px solid var(--accent); }
+
+  .pill {
+    display: inline-block; font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); margin-bottom: 10px;
+  }
+  .pill.green { background: var(--accent-2-soft); color: var(--accent-2); }
+  .pill.red { background: var(--warn-soft); color: var(--warn); }
+
+  /* Numbered steps */
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 14px; }
+  ol.steps li {
+    counter-increment: s; position: relative; padding: 14px 18px 14px 64px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    color: var(--ink-soft);
+  }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent); color: #fff; font-weight: 600; font-size: 15px;
+  }
+  ol.steps li strong { display: block; color: var(--ink); }
+
+  ul.ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.ticks li { padding-left: 30px; position: relative; color: var(--ink-soft); }
+  ul.ticks li::before {
+    content: ""; position: absolute; left: 4px; top: .55em; width: 12px; height: 7px;
+    border-left: 2.5px solid var(--accent-2); border-bottom: 2.5px solid var(--accent-2);
+    transform: rotate(-45deg);
+  }
+  ul.crosses li::before {
+    border: 0; width: 14px; height: 14px; top: .4em; left: 3px; transform: none;
+    background:
+      linear-gradient(45deg, transparent 43%, var(--warn) 43% 57%, transparent 57%),
+      linear-gradient(-45deg, transparent 43%, var(--warn) 43% 57%, transparent 57%);
+  }
+
+  /* Big stat */
+  .stat { font-family: var(--serif); font-size: clamp(64px, 10vw, 128px); font-weight: 700; color: var(--accent); line-height: 1; letter-spacing: -.03em; }
+  .stat small { font-size: .35em; color: var(--ink-soft); letter-spacing: 0; font-weight: 500; }
+
+  /* Bars */
+  .bars { display: grid; gap: 16px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 52px; gap: 14px; align-items: center; font-size: 16px; }
+  .bar-track { height: 28px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 6px 0 0 6px; }
+  .bar-fill.alt { background: var(--muted); }
+  .bar-val { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 520px) { .bar-row { grid-template-columns: 96px 1fr 44px; font-size: 14px; } }
+
+  /* Table */
+  table.body-lang { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); font-size: 16px; }
+  table.body-lang th, table.body-lang td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.body-lang tr:last-child td { border-bottom: 0; }
+  table.body-lang th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface-2); }
+  table.body-lang td:first-child { font-weight: 600; white-space: nowrap; }
+  .ok { color: var(--accent-2); }
+  .no { color: var(--warn); }
+
+  /* Flow (clicker) */
+  .flow { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; }
+  .flow .node { flex: 1 1 160px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; text-align: center; box-shadow: var(--shadow); }
+  .flow .node b { display: block; font-family: var(--serif); font-size: 22px; margin: 6px 0 4px; }
+  .flow .node span { color: var(--ink-soft); font-size: 15px; }
+  .flow .arrow { align-self: center; color: var(--accent); font-size: 26px; font-weight: 700; }
+  @media (max-width: 820px) { .flow .arrow { transform: rotate(90deg); margin: 0 auto; } .flow { flex-direction: column; } }
+
+  /* Timeline */
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; margin-top: 8px; }
+  .timeline::before { content: ""; position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--line); }
+  .tl { position: relative; padding: 34px 14px 0 0; }
+  .tl::before { content: ""; position: absolute; top: 4px; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--bg); }
+  .tl b { font-family: var(--serif); font-size: 22px; display: block; }
+  .tl span { color: var(--ink-soft); font-size: 15.5px; }
+  @media (max-width: 820px) {
+    .timeline { grid-template-columns: 1fr; gap: 18px; }
+    .timeline::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+    .tl { padding: 0 0 0 34px; }
+    .tl::before { top: 6px; }
+  }
+
+  /* Title slide */
+  .title-slide { text-align: left; }
+  .title-slide h1 em { font-style: italic; color: var(--accent); }
+  .title-wrap { display: grid; grid-template-columns: 1.3fr .7fr; gap: 40px; align-items: center; }
+  .cat-art { width: 100%; max-width: 380px; justify-self: center; }
+  @media (max-width: 820px) { .title-wrap { grid-template-columns: 1fr; } .cat-art { max-width: 240px; order: -1; justify-self: start; } }
+
+  .quote { font-family: var(--serif); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.35; border-left: 4px solid var(--accent); padding-left: 22px; margin: 0 0 18px; }
+
+  .rules { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px 32px; counter-reset: r; }
+  .rules div { counter-increment: r; display: flex; gap: 14px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .rules div::before { content: counter(r, decimal-leading-zero); font-family: var(--serif); color: var(--accent); font-weight: 700; font-size: 20px; min-width: 32px; }
+  @media (max-width: 820px) { .rules { grid-template-columns: 1fr; } }
+
+  .refs { columns: 2; column-gap: 32px; font-size: 13px; color: var(--ink-soft); margin: 0; padding-left: 18px; }
+  .refs li { break-inside: avoid; margin-bottom: 6px; }
+  .refs a { color: var(--accent); text-decoration: none; }
+  .refs a:hover { text-decoration: underline; }
+  @media (max-width: 820px) { .refs { columns: 1; } }
+
+  /* Photos */
+  .photo { position: relative; width: 100%; margin: 0; border-radius: 18px; overflow: hidden; background: var(--surface-2); box-shadow: var(--shadow); }
+  .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .photo figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 32px 14px 10px;
+    font-size: 13.5px; line-height: 1.35; color: #fff;
+    background: linear-gradient(transparent, rgba(0, 0, 0, .72));
+  }
+  .photo figcaption b { display: block; font-weight: 600; font-size: 14.5px; }
+  .photo .credit { display: block; font-size: 11px; opacity: .82; margin-top: 2px; }
+  .photo .credit a { color: inherit; }
+  .r-portrait { aspect-ratio: 4 / 5; max-height: 64vh; }
+  .r-square { aspect-ratio: 1; max-height: 52vh; }
+  .r-wide { aspect-ratio: 16 / 10; max-height: 40vh; }
+  .r-strip { aspect-ratio: 16 / 9; max-height: 28vh; }
+  .stack { display: grid; gap: 16px; }
+  .stat.sm { font-size: clamp(48px, 6vw, 76px); }
+  .media-row { display: grid; grid-template-columns: 1fr minmax(170px, 240px); gap: 32px; align-items: center; margin-bottom: 26px; }
+  .g-photo3 { display: grid; gap: 20px; grid-template-columns: .8fr 1fr 1fr; align-items: start; }
+  @media (max-width: 820px) {
+    .media-row, .g-photo3 { grid-template-columns: 1fr; }
+    .media-row .photo { max-width: 260px; }
+    .r-portrait, .r-square, .r-wide, .r-strip { max-height: none; }
+  }
+
+  /* ---------- Chrome ---------- */
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); transition: width .35s ease; z-index: 10; }
+  .controls {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px; z-index: 10;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px; box-shadow: var(--shadow);
+  }
+  .controls button {
+    appearance: none; border: 0; background: transparent; color: var(--ink); cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%; font-size: 18px; display: grid; place-items: center;
+  }
+  .controls button:hover { background: var(--surface-2); }
+  .controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .counter { font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--ink-soft); min-width: 64px; text-align: center; }
+
+  @media print {
+    body { overflow: visible; }
+    .deck { height: auto; }
+    .slide { position: relative; opacity: 1; visibility: visible; transform: none; page-break-after: always; min-height: 100vh; }
+    .controls, .progress { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<main class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide title-slide" aria-label="Title">
+    <div class="inner title-wrap">
+      <div>
+        <p class="kicker">A field guide for humans</p>
+        <h1>Cats Are <em>the Best</em></h1>
+        <p class="lead" style="margin-top:20px">…and yes, you can train them. A science-backed guide to understanding, teaching and living well with your cat.</p>
+        <p class="muted" style="font-size:15px;margin-top:28px">Use ← → or swipe to navigate · 20 slides</p>
+      </div>
+      <figure class="photo r-portrait cat-art">
+        <img src="images/cat-house.jpg" alt="Orange tabby cat sitting upright on a carpeted cat perch">
+        <figcaption><span class="credit">Photo: Roc0ast3r · <a href="https://commons.wikimedia.org/wiki/File:Red_tabby_sitting_on_a_cat_house.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide" aria-label="Why cats are the best">
+    <div class="inner">
+      <p class="kicker">Part 1 · Meet the cat</p>
+      <h2>Why cats are the best: they chose us</h2>
+      <p class="lead" style="margin-bottom:22px">Cats weren't bred for a job like dogs were. Wildcats moved in on their own when farming villages started storing grain, which drew in mice.</p>
+      <div class="grid g2" style="margin-bottom:30px">
+        <figure class="photo r-strip">
+          <img src="images/wildcat.jpg" alt="Sandy-coloured African wildcat walking across open ground" style="object-position:60% 50%">
+          <figcaption><b>The ancestor: the African wildcat (<i>Felis lybica</i>)</b><span class="credit">Photo: Karim Haddad · <a href="https://commons.wikimedia.org/wiki/File:Felis_lybica_lybica_258254456.jpg" target="_blank" rel="noopener">CC BY 4.0</a></span></figcaption>
+        </figure>
+        <figure class="photo r-strip">
+          <img src="images/cat-mummy.jpg" alt="Linen-wrapped ancient Egyptian cat mummy with a modelled cat face" style="object-position:50% 12%">
+          <figcaption><b>Ancient Egyptian cat mummy, Museo Egizio, Turin</b><span class="credit">Photo: Museo Egizio · <a href="https://commons.wikimedia.org/wiki/File:Cat_mummy_-_Museo_Egizio,_Turin_C_2348_03_p01.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+        </figure>
+      </div>
+      <div class="timeline">
+        <div class="tl"><b>~10,000 yrs ago</b><span>Near Eastern wildcats (<i>Felis silvestris lybica</i>) start living alongside the first farmers.</span></div>
+        <div class="tl"><b>~9,500 yrs ago</b><span>A cat is buried with a person on Cyprus. It's the oldest known evidence of a human–cat bond.</span></div>
+        <div class="tl"><b>~4,000 yrs ago</b><span>Cats show up in Egyptian art and later become sacred.</span></div>
+        <div class="tl"><b>Today</b><span>Hundreds of millions of cats live with people worldwide, and they still keep much of their wild instinct.</span></div>
+      </div>
+    </div>
+    <p class="source">Sources: Vigne et al., <i>Science</i> 2004; Driscoll et al., <i>Science</i> 2007; National Geographic (2004).</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide" aria-label="Myth: cats can't be trained">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Myth-busting</p>
+        <h2>"You can't train a cat." <span class="muted">Wrong.</span></h2>
+        <p class="quote">"Anyone can train their cat. You don't need a special cat, or any training experience."</p>
+        <p class="muted">— Dr Sarah Ellis, International Cat Care (paraphrased)</p>
+        <p class="lead">Cats learn constantly. They already know the sound of the treat bag and the sight of the carrier. Training just means <strong>teaching on purpose</strong>.</p>
+      </div>
+      <div class="stack">
+        <figure class="photo r-wide">
+          <img src="images/agile-cat.jpg" alt="White cat leaping down from a tree trunk mid-air" style="object-position:50% 40%">
+          <figcaption><b>Agile, curious, food-motivated: ideal learners</b><span class="credit">Photo: Isasza · <a href="https://commons.wikimedia.org/wiki/File:Chatte_agile_(2016;_cropped_2024).jpg" target="_blank" rel="noopener">CC BY 3.0</a></span></figcaption>
+        </figure>
+        <div class="card acc" style="text-align:center;padding:20px">
+          <div class="stat sm">95<small>%</small></div>
+          <p style="margin-top:6px">of cat owners in an iCatCare poll wanted <strong>more advice on training</strong>. Over <strong>half</strong> struggled to get their cat into a carrier.</p>
+        </div>
+      </div>
+    </div>
+    <p class="source">Source: International Cat Care / BSAVA, International Cat Day 2021 (#BeCatCurious).</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide" aria-label="Cats like people">
+    <div class="inner split">
+      <div>
+        <p class="kicker">The science</p>
+        <h2>Cats like us more than you think</h2>
+        <p class="lead">In a 2017 study, pet and shelter cats chose between people, food, toys and scents. <strong>Human interaction came out on top.</strong></p>
+        <p class="muted">Individual cats varied a lot, though. The training lesson: <strong>find out what <em class="hl">your</em> cat will work for</strong>. It could be a treat, a toy or a chin scratch.</p>
+      </div>
+      <div class="stack">
+      <figure class="photo r-strip">
+        <img src="images/kitten-petted.jpg" alt="Tabby kitten with eyes closed enjoying a chin scratch from a person's hand" style="object-position:50% 52%">
+        <figcaption><b>For half the cats, people beat food</b><span class="credit">Photo: Xoqoni Said · <a href="https://commons.wikimedia.org/wiki/File:A_Kitten_Relaxing_While_Being_Petted.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+      </figure>
+      <div class="card">
+        <h3 style="margin-bottom:18px">Each cat's most-preferred stimulus</h3>
+        <div class="bars">
+          <div class="bar-row"><span>Social interaction</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="bar-val">50%</span></div>
+          <div class="bar-row"><span>Food</span><div class="bar-track"><div class="bar-fill alt" style="width:37%"></div></div><span class="bar-val">37%</span></div>
+          <div class="bar-row"><span>Toys</span><div class="bar-track"><div class="bar-fill alt" style="width:11%"></div></div><span class="bar-val">11%</span></div>
+          <div class="bar-row"><span>Scent</span><div class="bar-track"><div class="bar-fill alt" style="width:2%"></div></div><span class="bar-val">2%</span></div>
+        </div>
+        <p style="margin-top:16px;font-size:14px" class="muted">n = 38 cats that showed a preference</p>
+      </div>
+      </div>
+    </div>
+    <p class="source">Source: Vitale Shreve, Mehrkam &amp; Udell (2017), "Social interaction, food, scent or toys?" <i>Behavioural Processes</i> 141:322–328.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" aria-label="Cats know their names">
+    <div class="inner split">
+      <div>
+        <p class="kicker">The science</p>
+        <h2>Yes, your cat knows its name (it just might not answer)</h2>
+        <p class="lead">Researchers in Tokyo played cats a list of four similar-sounding words, then the cat's own name. Cats got bored with the words but <strong>perked up at their own name</strong>.</p>
+        <p class="muted">The researchers think cats link their name with what usually follows it, like food, play or a vet trip. Training puts that to work.</p>
+      </div>
+      <div class="grid" style="gap:14px">
+        <figure class="photo r-strip">
+          <img src="images/cat-looking-up.jpg" alt="Tabby and white cat sitting in sunlight, looking up attentively" style="object-position:55% 40%">
+          <figcaption><b>Cats perk up at their own name</b><span class="credit">Photo: Nathan Asfaw · <a href="https://commons.wikimedia.org/wiki/File:A_cat_looking_up.jpg" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></figcaption>
+        </figure>
+        <div class="card good"><span class="pill green">Do</span><p>Say your cat's name before good things: meals, play, treats.</p></div>
+        <div class="card bad"><span class="pill red">Don't</span><p>Use the name to scold or just before something unpleasant. It "poisons" the cue.</p></div>
+      </div>
+    </div>
+    <p class="source">Source: Saito et al. (2019), "Domestic cats discriminate their names from other words," <i>Scientific Reports</i> 9:5394.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide" aria-label="How cats learn">
+    <div class="inner">
+      <p class="kicker">Part 2 · Training principles</p>
+      <h2>How cats learn: consequences drive behavior</h2>
+      <p class="lead" style="margin-bottom:28px">Behavior that gets rewarded gets repeated. Behavior that earns nothing fades away. That's the whole game.</p>
+      <div class="grid g4">
+        <div class="card acc"><span class="icon">🎯</span><h3>Be precise</h3><p>Reward the <strong>exact moment</strong> of the behavior you want. A late reward teaches the wrong thing.</p></div>
+        <div class="card acc"><span class="icon">⏱️</span><h3>Keep it short</h3><p>Sessions of <strong>2–5 minutes</strong>, and stop before your cat loses interest.</p></div>
+        <div class="card acc"><span class="icon">🪜</span><h3>Small steps</h3><p>Break skills into tiny pieces. If your cat struggles, <strong>make it easier</strong>.</p></div>
+        <div class="card acc"><span class="icon">🐾</span><h3>Cat's choice</h3><p>Let the cat opt in and walk away. Willing cats learn faster.</p></div>
+      </div>
+    </div>
+    <p class="source">Sources: Humane Colorado; Humane Society of Southern Colorado; AAFP/ISFM Cat Friendly Interaction Guidelines (2022).</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide" aria-label="Why punishment fails">
+    <div class="inner">
+      <p class="kicker">Training principles</p>
+      <h2>Why punishment backfires</h2>
+      <div class="grid g2">
+        <div class="card bad">
+          <span class="pill red">What punishment teaches</span>
+          <ul class="ticks crosses" style="margin-top:6px">
+            <li>The cat links the scolding to <strong>you</strong>, not the scratching.</li>
+            <li>It learns to misbehave <strong>when you're not there</strong>.</li>
+            <li>Fear can turn into <strong>defensive aggression</strong> and hiding.</li>
+            <li>Punishing after the fact does nothing. The cat can't connect the two.</li>
+          </ul>
+        </div>
+        <div class="card good">
+          <span class="pill green">Do this instead</span>
+          <ul class="ticks" style="margin-top:6px">
+            <li><strong>Redirect</strong> to an acceptable option (a post instead of the sofa).</li>
+            <li><strong>Reward</strong> the right choice right away.</li>
+            <li><strong>Manage</strong> the environment so the wrong choice is less appealing.</li>
+            <li>Check for a <strong>medical cause</strong> when behavior suddenly changes.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="source">Sources: HSUS / Dumb Friends League "Destructive Scratching" handout; San Francisco SPCA; Cornell Feline Health Center.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide" aria-label="Read the cat first">
+    <div class="inner">
+      <p class="kicker">Training principles</p>
+      <h2>Read the cat before you train</h2>
+      <div class="split" style="grid-template-columns:1.35fr .65fr;gap:28px;align-items:start">
+      <div>
+      <table class="body-lang">
+        <thead><tr><th>Signal</th><th class="ok">Relaxed, ready to learn</th><th class="no">Stressed, stop and give space</th></tr></thead>
+        <tbody>
+          <tr><td>Tail</td><td>Held upright, sometimes with a hooked tip</td><td>Puffed up, lashing, or tucked tight around the body</td></tr>
+          <tr><td>Ears</td><td>Forward and relaxed</td><td>Flattened sideways or back ("airplane ears")</td></tr>
+          <tr><td>Eyes</td><td>Soft gaze, <strong>slow blinks</strong></td><td>Wide pupils, hard stare, or squinting with tension</td></tr>
+          <tr><td>Body</td><td>Loose, approaches you, rubs against you</td><td>Crouched low, frozen, turning away, skin twitching</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin-top:18px;font-size:16px">💡 Try a slow blink at your cat. Many cats slow-blink back, a sign of a relaxed, trusting cat.</p>
+      </div>
+      <div class="stack">
+        <figure class="photo r-strip" style="max-height:24vh">
+          <img src="images/love-cats.jpg" alt="Tabby and white cat walking toward the camera with its tail held straight up" style="object-position:20% 40%">
+          <figcaption><b class="ok" style="color:#9be3cf">✓ Tail up: a friendly hello</b><span class="credit">Photo: Helgi Halldórsson · <a href="https://commons.wikimedia.org/wiki/File:Love_Cats_(2302117417).jpg" target="_blank" rel="noopener">CC BY-SA 2.0</a></span></figcaption>
+        </figure>
+        <figure class="photo r-strip" style="max-height:24vh">
+          <img src="images/airplane-ears.jpg" alt="Tabby and white cat crouched with ears turned out sideways" style="object-position:55% 40%">
+          <figcaption><b style="color:#ffb4ac">✗ Sideways "airplane" ears: uneasy</b><span class="credit">Photo: Hisashi · <a href="https://commons.wikimedia.org/wiki/File:Mackerel_tabby_cat_with_green_eyes_and_Mazingar_ears-Hisashi-01.jpg" target="_blank" rel="noopener">CC BY-SA 2.0</a></span></figcaption>
+        </figure>
+      </div>
+      </div>
+    </div>
+    <p class="source">Sources: VCA Animal Hospitals, "How to read your cat's body language"; Wisconsin Humane Society.</p>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide" aria-label="Training toolkit">
+    <div class="inner">
+      <p class="kicker">Part 3 · Getting started</p>
+      <h2>Your training toolkit</h2>
+      <div class="grid g4">
+        <div class="card"><span class="icon">🔘</span><h3>A marker</h3><p>A clicker, or a short word like "yes!" said the same way every time.</p></div>
+        <div class="card"><span class="icon">🍗</span><h3>High-value treats</h3><p>Tiny pieces, smaller than a pea. Lickable treats or cooked chicken work well. Save them <strong>only for training</strong>.</p></div>
+        <div class="card"><span class="icon">🥢</span><h3>A target stick</h3><p>A chopstick, a spatula, or a pen with a ball on the end.</p></div>
+        <div class="card"><span class="icon">🕰️</span><h3>Good timing</h3><p>Train <strong>before meals</strong>, when your cat is a little hungry, in a quiet room.</p></div>
+      </div>
+      <p class="lead" style="margin-top:28px">Remember to count training treats in your cat's daily food allowance.</p>
+    </div>
+    <p class="source">Sources: Humane Colorado; Kinship; Toronto Humane Society; SPCA Cincinnati.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" aria-label="Clicker step 1">
+    <div class="inner">
+      <p class="kicker">Clicker training · Step 1</p>
+      <h2>Charge the clicker</h2>
+      <div class="media-row">
+        <p class="lead" style="margin:0">The click works as a <strong>bridge</strong>. It marks the exact instant your cat got it right, which buys you a second or two to deliver the treat. Always the same sound, always followed by something good.</p>
+        <figure class="photo r-square" style="max-height:24vh">
+          <img src="images/clicker.jpg" alt="Blue box clicker with a red button" style="object-position:50% 45%">
+          <figcaption><b>A standard training clicker</b><span class="credit">Photo: coolgurl5555 · <a href="https://commons.wikimedia.org/wiki/File:Clicker.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+        </figure>
+      </div>
+      <div class="flow">
+        <div class="node"><span>🔘</span><b>Click</b><span>One crisp click</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><span>🍗</span><b>Treat</b><span>Within ~1–2 seconds</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><span>🔁</span><b>Repeat ×5</b><span>Several mini-sessions</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><span>👂</span><b>Test</b><span>Click when the cat looks away. Does it turn to you?</span></div>
+      </div>
+      <p class="muted" style="margin-top:24px">If the click startles your cat, muffle it in a pocket or use a clicky pen. Be <strong>generous</strong> early on so your cat thinks training is the best thing ever.</p>
+    </div>
+    <p class="source">Sources: Humane Colorado, "Cat clicker training"; Humane Society of Southern Colorado, "Cat Clicker Training Basics."</p>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" aria-label="Targeting">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Clicker training · Step 2</p>
+        <h2>Targeting: the skill that unlocks everything</h2>
+        <ol class="steps">
+          <li><strong>Present the target</strong>Hold a chopstick a few cm from your cat's nose.</li>
+          <li><strong>Click the sniff</strong>Cats are curious. The instant the nose touches it, click and treat.</li>
+          <li><strong>Move it around</strong>Left, right, up, a little further away each time.</li>
+          <li><strong>Add a cue</strong>Once it's reliable, say "touch" just before presenting it.</li>
+        </ol>
+      </div>
+      <div class="card acc">
+        <h3>Why targeting matters</h3>
+        <p style="margin-bottom:12px">Once your cat follows a target, you can guide it <strong>without picking it up</strong>:</p>
+        <ul class="ticks">
+          <li>Into the carrier</li>
+          <li>Onto the scale or a cat bed</li>
+          <li>Off the kitchen counter</li>
+          <li>Through hoops, onto stools, and into tricks</li>
+        </ul>
+      </div>
+    </div>
+    <p class="source">Sources: Kinship, "A step-by-step guide on how to clicker train your cat"; HSSC Cat Clicker Training Basics.</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" aria-label="Come when called">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Part 4 · Useful skills</p>
+        <h2>Come when called</h2>
+        <ol class="steps">
+          <li><strong>Pick a unique cue</strong>A word or sound, like a whistle or a shaken treat pot. Don't rely on the name alone.</li>
+          <li><strong>Start close</strong>Say the cue, then reward the moment your cat comes over, even from 1 metre away.</li>
+          <li><strong>Add distance</strong>Call from another room, then another floor.</li>
+          <li><strong>Go intermittent</strong>Once it's reliable, reward most calls, not all. The uncertainty keeps cats keen.</li>
+        </ol>
+      </div>
+      <div class="stack">
+      <figure class="photo r-strip">
+        <img src="images/thai-cat.jpg" alt="Black cat with green eyes sitting and looking up at the camera, ears forward" style="object-position:50% 35%">
+        <figcaption><b>Ears forward, eyes on you: ready to come</b><span class="credit">Photo: Lolavies · <a href="https://commons.wikimedia.org/wiki/File:Thai_cat_looks_up_at_the_photographer.jpg" target="_blank" rel="noopener">CC BY-SA 3.0</a></span></figcaption>
+      </figure>
+      <div class="card bad">
+        <span class="pill red">The golden rule</span>
+        <h3>Never call your cat for something it dislikes</h3>
+        <p>If "come" sometimes means a pill or the carrier, the recall falls apart. For those, <strong>go and get</strong> your cat instead.</p>
+        <p style="margin-top:12px">A solid recall is a real safety tool in an emergency, like a fire, an escape or an evacuation.</p>
+      </div>
+      </div>
+    </div>
+    <p class="source">Sources: Ontario SPCA, "How to teach a cat recall" (2026); <i>Your Cat</i> magazine; Rover.</p>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" aria-label="Sit and high five">
+    <div class="inner">
+      <p class="kicker">Useful skills</p>
+      <h2>Fun tricks: Sit &amp; High-five</h2>
+      <div class="g-photo3">
+        <figure class="photo r-portrait" style="max-height:56vh">
+          <img src="images/siamese-sit.jpg" alt="Siamese cat sitting neatly and looking up at the camera" style="object-position:30% 50%">
+          <figcaption><b>The finished "sit": bottom down, eyes up</b><span class="credit">Photo: chexov · <a href="https://commons.wikimedia.org/wiki/File:Siamese_cat_sitting_(2005;_cropped_2025).jpg" target="_blank" rel="noopener">CC BY 2.0</a></span></figcaption>
+        </figure>
+        <div class="card acc">
+          <span class="pill">Sit</span>
+          <ol class="steps" style="margin-top:6px">
+            <li>Hold a treat just above your cat's nose.</li>
+            <li>Move it slowly back over the head. Most cats sit naturally.</li>
+            <li>Click the moment the bottom touches down, then treat.</li>
+            <li>Add the word "sit" once the cat sits reliably.</li>
+          </ol>
+        </div>
+        <div class="card acc">
+          <span class="pill">High-five</span>
+          <ol class="steps" style="margin-top:6px">
+            <li>Start from a sit. Hold a treat in a closed fist just above paw height.</li>
+            <li>Click any paw lift, even a tiny one.</li>
+            <li>Gradually swap the fist for an open palm.</li>
+            <li>Raise your hand bit by bit and add the cue "high five!"</li>
+          </ol>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:18px">Tricks aren't just party pieces. They build confidence and your bond, and give your cat mental exercise.</p>
+    </div>
+    <p class="source">Sources: Cats.com, "How to clicker train a cat"; Kinship.</p>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" aria-label="Scratching">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Part 5 · Everyday behavior</p>
+        <h2>Scratching: redirect it, don't stop it</h2>
+        <p class="lead">Scratching is <strong>normal and necessary</strong>. It keeps claws in shape, stretches muscles, and leaves scent marks. Your job is to tell your cat <em class="hl">where</em> to scratch.</p>
+        <ul class="ticks">
+          <li>Offer <strong>several types</strong>: upright, flat and angled; sisal, cardboard and wood.</li>
+          <li>Posts must be <strong>tall and sturdy</strong>. A wobbly post is a rejected post.</li>
+          <li>Place them <strong>near sleeping spots</strong>, since cats scratch on waking, and <strong>next to</strong> the furniture they target.</li>
+          <li>Reward use with treats, praise or catnip.</li>
+        </ul>
+      </div>
+      <div class="grid" style="gap:14px">
+        <figure class="photo r-strip">
+          <img src="images/scratch-pad.jpg" alt="Close-up of a cat's front paws digging into a shredded corrugated cardboard scratcher" style="object-position:50% 60%">
+          <figcaption><b>A cheap cardboard scratcher, well loved</b><span class="credit">Photo: Arria Belli · <a href="https://commons.wikimedia.org/wiki/File:Corrugated_fiberboard_scratch_pad_with_cat.jpg" target="_blank" rel="noopener">CC BY-SA 2.0</a></span></figcaption>
+        </figure>
+        <div class="card"><span class="icon">🛋️</span><h3>Protect the sofa</h3><p>Double-sided tape, foil, or a carpet runner pointy-side-up. Keep it in place until the post has been used reliably for several weeks.</p></div>
+        <div class="card bad"><span class="icon">🚫</span><h3>Never</h3><p>Force paws onto the post, or declaw. The ASPCA opposes declawing, which is an amputation.</p></div>
+      </div>
+    </div>
+    <p class="source">Sources: ASPCA, "Scratching behavior in cats"; North Shore Animal League America; HSUS "Destructive Scratching" handout.</p>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide" aria-label="Litter box">
+    <div class="inner">
+      <p class="kicker">Everyday behavior</p>
+      <h2>Litter box success</h2>
+      <div class="split" style="align-items:start;gap:28px">
+        <div class="stack">
+          <figure class="photo" style="height:38vh">
+            <img src="images/litter-box.jpg" alt="Calico kitten digging in a large, open, low-sided litter tray filled with clumping litter">
+            <figcaption><b>Open, roomy, low sides, fine clumping litter</b><span class="credit">Photo: MiNe · <a href="https://commons.wikimedia.org/wiki/File:2008-11-28_a_Calico_kitten_on_the_litter_box.jpg" target="_blank" rel="noopener">CC BY 2.0</a></span></figcaption>
+          </figure>
+          <div class="card bad" style="display:flex;gap:16px;align-items:center">
+            <span class="icon" style="margin:0">🩺</span>
+            <p><strong>Peeing outside the box? See the vet first.</strong> Urinary problems, pain and stress are common causes. Never scold or rub a cat's nose in it, because that only adds to the stress.</p>
+          </div>
+        </div>
+        <div class="stack" style="gap:14px">
+          <div class="card good"><h3>📍 Location</h3><p>Quiet, easy to reach, and <strong>away from food and water</strong>. Put one on every floor of the house.</p></div>
+          <div class="card good"><h3>📏 Size &amp; number</h3><p>Big enough to turn around in, with low sides for kittens and seniors. A common guideline is <strong>one box per cat, plus one</strong>.</p></div>
+          <div class="card good"><h3>🧼 Litter &amp; cleaning</h3><p>Unscented, clumping litter. Scoop <strong>daily</strong>. Clean accidents with an <strong>enzymatic</strong> cleaner so the smell doesn't draw the cat back.</p></div>
+        </div>
+      </div>
+    </div>
+    <p class="source">Sources: North Shore Animal League America; Joyful Pets; ASPCA, "Common cat behavior issues."</p>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide" aria-label="Carrier training">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Part 6 · Vet-ready cats</p>
+        <h2>Carrier training: from scary box to safe den</h2>
+        <ol class="steps">
+          <li><strong>Make it furniture</strong>Leave the carrier out all the time, door off, with a soft blanket that smells of home.</li>
+          <li><strong>Make it magic</strong>Toss treats in and near it, and feed meals beside it, then inside it.</li>
+          <li><strong>Door practice</strong>Close the door for one second, treat, and open it. Build up slowly.</li>
+          <li><strong>Lift &amp; move</strong>Lift it a few cm, then carry it around the room, then take short car trips.</li>
+        </ol>
+      </div>
+      <div class="stack">
+        <figure class="photo r-wide">
+          <img src="images/carrier.jpg" alt="Tabby cat sitting calmly in an open-topped soft carrier" style="object-position:50% 0%">
+          <figcaption><b>Goal: a carrier your cat chooses to sit in</b><span class="credit">Photo: Greg Mote · <a href="https://commons.wikimedia.org/wiki/File:2007-01-13_Cat_in_a_carrier_(square).jpg" target="_blank" rel="noopener">CC BY 2.0</a></span></figcaption>
+        </figure>
+        <div class="card acc">
+          <h3>Why it matters</h3>
+          <p>Cats outnumber dogs as pets but go to the vet <strong>far less often</strong>, and stressful journeys are a big reason why. A cat that walks into its carrier (try your <strong>target stick</strong>!) arrives calmer and gets a better exam.</p>
+        </div>
+      </div>
+    </div>
+    <p class="source">Sources: International Cat Care carrier-training videos; AAFP/ISFM Cat Friendly Veterinary Interaction &amp; Environment Guidelines (2022).</p>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide" aria-label="Cooperative care">
+    <div class="inner">
+      <p class="kicker">Vet-ready cats</p>
+      <h2>Cooperative care: handling without a fight</h2>
+      <div class="media-row">
+        <div>
+          <p class="lead">Vets now stress giving cats <strong>choice and control</strong>. You can practise the same at home, one touch at a time.</p>
+          <p class="muted" style="margin:0">Start with places your cat already enjoys being touched, like the head and cheeks. Pair each new touch with a treat, and stop while your cat is still relaxed.</p>
+        </div>
+        <figure class="photo r-square" style="max-height:30vh">
+          <img src="images/cat-petted.jpg" alt="Black and white cat lying calmly on grass while a hand rests on its head" style="object-position:50% 40%">
+          <figcaption><b>Calm, accepted touch</b><span class="credit">Photo: Josephguy15 2.0 · <a href="https://commons.wikimedia.org/wiki/File:Cat_petted.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+        </figure>
+      </div>
+      <div class="grid g4">
+        <div class="card"><span class="icon">🐾</span><h3>Paws</h3><p>Touch a paw → treat. Gently press to show a claw → treat. Trim <strong>one</strong> nail → jackpot.</p></div>
+        <div class="card"><span class="icon">👂</span><h3>Ears</h3><p>Stroke the ear base, then lift the flap briefly. Pair each step with a treat.</p></div>
+        <div class="card"><span class="icon">👄</span><h3>Mouth</h3><p>Touch the cheek, then lift the lip for a second. This prepares your cat for tooth checks and brushing.</p></div>
+        <div class="card"><span class="icon">🪮</span><h3>Coat</h3><p>Short brushing sessions on favourite spots first (usually the cheeks and chin).</p></div>
+      </div>
+      <p class="muted" style="margin-top:22px">If your cat pulls away, that's information, not defiance. Go back a step. <strong>Fewer, gentler touches</strong> beat a wrestling match.</p>
+    </div>
+    <p class="source">Sources: AAFP/ISFM (2022) <i>J Feline Med Surg</i> 24:1093–1132; International Cat Care handling video series (with Ceva).</p>
+  </section>
+
+  <!-- 18 -->
+  <section class="slide" aria-label="Harness training">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Part 7 · Adventures</p>
+        <h2>Harness &amp; leash walking</h2>
+        <ol class="steps">
+          <li><strong>Sniff it</strong>Leave the harness on the floor. Treat any interest.</li>
+          <li><strong>Drape, then fasten</strong>Start with 30–60 seconds indoors, paired with food. Build up over days.</li>
+          <li><strong>Add a light leash</strong>Let it trail indoors, then follow your cat around, keeping it loose.</li>
+          <li><strong>Doorstep first</strong>Let your cat look out, then go to a quiet, enclosed garden. <strong>The cat sets the pace.</strong></li>
+        </ol>
+        <p class="muted" style="margin-top:14px;font-size:16px">😹 <strong>The "flop" is normal.</strong> Many cats freeze or fall over in a new harness. Train before meals and use treats to get them moving.</p>
+      </div>
+      <div class="stack">
+        <figure class="photo r-wide">
+          <img src="images/leash.jpg" alt="Young tabby cat in a blue harness on a leash outdoors at a picnic area" style="object-position:45% 50%">
+          <figcaption><b>Harness-trained cat on an outing, Joshua Tree NP</b><span class="credit">Photo: NPS / Joshua Tree National Park · <a href="https://commons.wikimedia.org/wiki/File:Cat_on_a_Leash_at_Quail_Springs_Picnic_Area_(33494784978).jpg" target="_blank" rel="noopener">Public domain</a></span></figcaption>
+        </figure>
+        <div class="card bad"><h3>⚠️ Safety</h3><p>Use an escape-proof <strong>harness, never a collar</strong>. Vaccinate, use flea and tick protection, microchip, and avoid dogs and traffic.</p></div>
+      </div>
+    </div>
+    <p class="source">Sources: Toronto Humane Society, "Harness Training Your Cat"; Wisconsin Humane Society, "Leash training your cat"; Cats.com.</p>
+  </section>
+
+  <!-- 19 -->
+  <section class="slide" aria-label="Enrichment">
+    <div class="inner split">
+      <div>
+        <p class="kicker">Part 8 · A happy cat</p>
+        <h2>Enrichment: let them be a cat</h2>
+        <p class="lead">Many behavior "problems" are really boredom. Cats evolved to <strong>hunt many small meals a day</strong>, not to eat out of a bowl.</p>
+        <ul class="ticks">
+          <li><strong>Food puzzles</strong>: treat balls, snuffle mats, egg-carton feeders.</li>
+          <li><strong>Hunt → catch → eat → groom → sleep</strong>: play with a wand toy, then feed a meal.</li>
+          <li><strong>Vertical space</strong>: shelves, cat trees, window perches.</li>
+          <li><strong>Rotate toys</strong> weekly so they stay new.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <figure class="photo r-wide">
+          <img src="images/slow-feeder.jpg" alt="Tabby cat sitting next to a white activity board food puzzle with kibble in its wells and channels">
+          <figcaption><b>Remus and his food-puzzle board</b><span class="credit">Photo: Anja · <a href="https://commons.wikimedia.org/wiki/File:Remus_and_the_slow_feeder.jpg" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></figcaption>
+        </figure>
+        <div class="card acc" style="display:flex;gap:18px;align-items:center;padding:18px 20px">
+          <div class="stat sm">52<small>%</small></div>
+          <p>of owners in a UC Davis survey had <strong>never tried</strong> a food puzzle. Case studies link puzzles to help with <strong>weight loss, anxiety</strong> and <strong>litter box problems</strong>.</p>
+        </div>
+      </div>
+    </div>
+    <p class="source">Sources: Dantas, Delgado, Johnson &amp; Buffington (2016), <i>J Feline Med Surg</i> 18(9):723–732; UC Davis owner survey (2018).</p>
+  </section>
+
+  <!-- 20 -->
+  <section class="slide" aria-label="Golden rules and sources">
+    <div class="inner">
+      <p class="kicker">Wrap-up</p>
+      <h2>The golden rules of cat training</h2>
+      <div class="rules" style="margin-bottom:28px">
+        <div>Reward what you like, and ignore or redirect what you don't.</div>
+        <div>Mark the exact moment with a click or "yes!"</div>
+        <div>Keep sessions to a few minutes. End on a win.</div>
+        <div>Let your cat choose to take part.</div>
+        <div>Never punish. It teaches fear, not manners.</div>
+        <div>Sudden behavior change? See the vet first.</div>
+      </div>
+      <details>
+        <summary style="cursor:pointer;font-weight:600;color:var(--accent);margin-bottom:10px">Sources &amp; further reading (full list in resources.md)</summary>
+        <ol class="refs">
+          <li>Vigne et al. (2004) <i>Science</i> 304:259. <a href="https://www.nationalgeographic.com/animals/article/oldest-known-pet-cat-9500-year-old-burial-found-on-cyprus" target="_blank" rel="noopener">NatGeo</a></li>
+          <li>Driscoll et al. (2007) <i>Science</i> 317:519–523.</li>
+          <li>Vitale Shreve et al. (2017) <i>Behav Processes</i> 141:322–328. <a href="https://phys.org/news/2017-03-cats-humans-thought.html" target="_blank" rel="noopener">Phys.org</a></li>
+          <li>Saito et al. (2019) <i>Sci Rep</i> 9:5394.</li>
+          <li>Dantas et al. (2016) <i>JFMS</i> 18(9):723–732. <a href="https://czaw.org/resources/food-puzzles-for-cats-feeding-for-physical-and-emotional-wellbeing/" target="_blank" rel="noopener">CZAW</a></li>
+          <li>AAFP/ISFM (2022) Cat Friendly Interaction Guidelines. <a href="https://catvets.com/interactions" target="_blank" rel="noopener">catvets.com</a></li>
+          <li>International Cat Care. <a href="https://icatcare.org" target="_blank" rel="noopener">icatcare.org</a></li>
+          <li>ASPCA: Scratching behavior. <a href="https://www.aspca.org/pet-care/general-pet-care/scratching-behavior-cats" target="_blank" rel="noopener">aspca.org</a></li>
+          <li>Humane Colorado: Clicker training. <a href="https://humanecolorado.org/resources/cat-clicker-training/" target="_blank" rel="noopener">link</a></li>
+          <li>Kinship: Clicker training guide. <a href="https://kinship.com/cat-behavior/clicker-training-for-cats" target="_blank" rel="noopener">link</a></li>
+          <li>Toronto Humane: Harness training. <a href="https://www.torontohumanesociety.com/wp-content/uploads/2023/11/Harness-Training-Your-Cat.pdf" target="_blank" rel="noopener">PDF</a></li>
+          <li>Ontario SPCA: Recall. <a href="https://ontariospca.ca/blog/how-to-teach-a-cat-recall/" target="_blank" rel="noopener">link</a></li>
+          <li>VCA: Cat body language. <a href="https://vcahospitals.com/pediatric/kitten/behavior-training/how-to-read-your-cats-body-language" target="_blank" rel="noopener">link</a></li>
+          <li>Ellis &amp; Bradshaw (2016) <i>The Trainable Cat</i>.</li>
+        </ol>
+      </details>
+      <details style="margin-top:10px">
+        <summary style="cursor:pointer;font-weight:600;color:var(--accent);margin-bottom:10px">Photo credits (Wikimedia Commons)</summary>
+        <p class="refs" style="font-size:13px;line-height:1.6">
+          Red tabby on cat house: Roc0ast3r, CC0 ·
+          African wildcat: Karim Haddad, CC BY 4.0 ·
+          Cat mummy: Museo Egizio, CC0 ·
+          Agile cat: Isasza, CC BY 3.0 ·
+          Kitten being petted: Xoqoni Said, CC0 ·
+          Cat looking up: Nathan Asfaw, CC BY-SA 4.0 ·
+          Love Cats: Helgi Halldórsson, CC BY-SA 2.0 ·
+          Airplane ears: Hisashi, CC BY-SA 2.0 ·
+          Clicker: coolgurl5555, CC0 ·
+          Thai cat: Lolavies, CC BY-SA 3.0 ·
+          Siamese sitting: chexov, CC BY 2.0 ·
+          Cardboard scratcher: Arria Belli, CC BY-SA 2.0 ·
+          Calico kitten in litter box: MiNe, CC BY 2.0 ·
+          Cat in carrier: Greg Mote, CC BY 2.0 ·
+          Cat being petted: Josephguy15 2.0, CC0 ·
+          Cat on a leash: NPS / Joshua Tree NP, public domain ·
+          Remus and the slow feeder: Anja, CC BY-SA 4.0.
+          Each photo's caption links to its Commons page and license. Images were resized; no other changes.
+        </p>
+      </details>
+      <p class="lead" style="margin-top:24px">🐈 Cats are the best, and a trained cat is a happier, calmer, safer one.</p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="controls" aria-label="Slide navigation">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span class="counter" id="counter">1 / 20</span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+  <button id="themeBtn" aria-label="Toggle light/dark theme" title="Toggle theme">◐</button>
+</nav>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let i = 0;
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => {
+      s.classList.toggle('active', k === i);
+      s.classList.toggle('prev', k < i);
+      s.setAttribute('aria-hidden', k === i ? 'false' : 'true');
+    });
+    slides[i].scrollTop = 0;
+    counter.textContent = (i + 1) + ' / ' + slides.length;
+    progress.style.width = ((i + 1) / slides.length * 100) + '%';
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  document.getElementById('prevBtn').onclick = () => show(i - 1);
+  document.getElementById('nextBtn').onclick = () => show(i + 1);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('summary')) return;
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  let x0 = null, y0 = null;
+  document.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) show(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+
+  // Theme toggle
+  const root = document.documentElement;
+  try { const t = localStorage.getItem('cat-deck-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+  document.getElementById('themeBtn').onclick = () => {
+    const dark = root.dataset.theme
+      ? root.dataset.theme === 'dark'
+      : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('cat-deck-theme', root.dataset.theme); } catch (e) {}
+  };
+
+  const start = parseInt(location.hash.slice(1), 10);
+  show(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
